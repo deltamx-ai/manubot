@@ -1,7 +1,41 @@
 import { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
+import hljs from 'highlight.js/lib/core'
+import javascript from 'highlight.js/lib/languages/javascript'
+import typescript from 'highlight.js/lib/languages/typescript'
+import python from 'highlight.js/lib/languages/python'
+import css from 'highlight.js/lib/languages/css'
+import xml from 'highlight.js/lib/languages/xml'
+import json from 'highlight.js/lib/languages/json'
+import bash from 'highlight.js/lib/languages/bash'
+import java from 'highlight.js/lib/languages/java'
+import cpp from 'highlight.js/lib/languages/cpp'
+import go from 'highlight.js/lib/languages/go'
+import rust from 'highlight.js/lib/languages/rust'
+import sql from 'highlight.js/lib/languages/sql'
+import 'highlight.js/styles/github-dark.css'
 import { ChatSession, Message } from './types'
 import './App.css'
+
+hljs.registerLanguage('javascript', javascript)
+hljs.registerLanguage('js', javascript)
+hljs.registerLanguage('typescript', typescript)
+hljs.registerLanguage('ts', typescript)
+hljs.registerLanguage('python', python)
+hljs.registerLanguage('py', python)
+hljs.registerLanguage('css', css)
+hljs.registerLanguage('html', xml)
+hljs.registerLanguage('xml', xml)
+hljs.registerLanguage('json', json)
+hljs.registerLanguage('bash', bash)
+hljs.registerLanguage('sh', bash)
+hljs.registerLanguage('java', java)
+hljs.registerLanguage('cpp', cpp)
+hljs.registerLanguage('c', cpp)
+hljs.registerLanguage('go', go)
+hljs.registerLanguage('rust', rust)
+hljs.registerLanguage('rs', rust)
+hljs.registerLanguage('sql', sql)
 
 function App(): JSX.Element {
   const [sessions, setSessions] = useState<ChatSession[]>([])
@@ -185,10 +219,17 @@ function App(): JSX.Element {
                           const codeString = String(children).replace(/\n$/, '')
 
                           if (!inline) {
+                            const highlighted = lang && hljs.getLanguage(lang)
+                              ? hljs.highlight(codeString, { language: lang })
+                              : hljs.highlightAuto(codeString)
+
                             return (
                               <div className="relative bg-gray-900 text-gray-100 rounded my-2 overflow-x-auto pb-10">
                                 <pre className="p-3">
-                                  <code className={`language-${lang}`}>{codeString}</code>
+                                  <code
+                                    className={`hljs language-${lang}`}
+                                    dangerouslySetInnerHTML={{ __html: highlighted.value }}
+                                  />
                                 </pre>
                                 <button
                                   onClick={() => copyToClipboard(codeString)}
