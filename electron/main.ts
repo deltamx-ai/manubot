@@ -1,10 +1,7 @@
 import { app, BrowserWindow } from 'electron'
-import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 
-// @ts-ignore - require is used indirectly by electron
-const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 // The built directory structure
@@ -33,6 +30,8 @@ function createWindow(): void {
     webPreferences: {
       preload: path.join(__dirname, 'preload.mjs'),
     },
+    frame: false,
+    titleBarStyle: 'hiddenInset',
   })
 
   // Test active push message to Renderer-process.
