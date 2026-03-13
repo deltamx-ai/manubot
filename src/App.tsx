@@ -3,50 +3,9 @@ import { ChatSession, Message } from './types'
 import './App.css'
 
 function App(): JSX.Element {
-  const [sessions, setSessions] = useState<ChatSession[]>([
-    {
-      id: '1',
-      title: 'First Chat',
-      messages: [
-        {
-          id: '1',
-          content: 'Hello! How can I help you?',
-          sender: 'bot',
-          timestamp: new Date(),
-        },
-        {
-          id: '2',
-          content: 'Hi! I need some help with my project.',
-          sender: 'user',
-          timestamp: new Date(Date.now() + 1000),
-        },
-      ],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-    {
-      id: '2',
-      title: 'Second Chat',
-      messages: [
-        {
-          id: '1',
-          content: 'What is Electron?',
-          sender: 'user',
-          timestamp: new Date(),
-        },
-        {
-          id: '2',
-          content: 'Electron is a framework for building cross-platform desktop applications.',
-          sender: 'bot',
-          timestamp: new Date(Date.now() + 1000),
-        },
-      ],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-  ])
+  const [sessions, setSessions] = useState<ChatSession[]>([])
 
-  const [currentSessionId, setCurrentSessionId] = useState<string>('1')
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null)
   const [inputValue, setInputValue] = useState<string>('')
 
   const currentSession = sessions.find((s) => s.id === currentSessionId)
@@ -116,7 +75,7 @@ function App(): JSX.Element {
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar - Chat History */}
-      <div className="w-64 bg-gray-800 text-white flex flex-col">
+      <div className="w-64 min-w-64 bg-gray-800 text-white flex flex-col">
         <div className="p-4 border-b border-gray-700">
           <button
             onClick={handleNewChat}
@@ -147,7 +106,7 @@ function App(): JSX.Element {
 
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col bg-white">
-        {/* Chat Messages */}
+        {/* Chat Messages - Flexible height */}
         <div className="flex-1 overflow-y-auto p-6 space-y-4">
           {currentSession && currentSession.messages.length > 0 ? (
             currentSession.messages.map((message) => (
@@ -176,9 +135,9 @@ function App(): JSX.Element {
           )}
         </div>
 
-        {/* Input Area */}
-        <div className="border-t border-gray-300 bg-white p-4">
-          <div className="flex gap-2">
+        {/* Input Area - Fixed height */}
+        <div className="h-20 border-t border-gray-300 bg-white p-4 flex-shrink-0">
+          <div className="flex gap-2 h-full">
             <input
               type="text"
               value={inputValue}
@@ -194,7 +153,7 @@ function App(): JSX.Element {
             />
             <button
               onClick={handleSendMessage}
-              className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg transition-colors"
+              className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg transition-colors flex-shrink-0"
             >
               Send
             </button>
