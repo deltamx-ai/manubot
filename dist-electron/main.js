@@ -1,22 +1,22 @@
 import { app as n, BrowserWindow as t } from "electron";
-import { createRequire as a } from "node:module";
-import { fileURLToPath as c } from "node:url";
+import { fileURLToPath as a } from "node:url";
 import o from "node:path";
-a(import.meta.url);
-const r = o.dirname(c(import.meta.url));
-process.env.APP_ROOT = o.join(r, "..");
-const i = process.env.VITE_DEV_SERVER_URL, _ = o.join(process.env.APP_ROOT, "dist-electron"), s = o.join(process.env.APP_ROOT, "dist");
-process.env.VITE_PUBLIC = i ? o.join(process.env.APP_ROOT, "public") : s;
+const i = o.dirname(a(import.meta.url));
+process.env.APP_ROOT = o.join(i, "..");
+const s = process.env.VITE_DEV_SERVER_URL, m = o.join(process.env.APP_ROOT, "dist-electron"), r = o.join(process.env.APP_ROOT, "dist");
+process.env.VITE_PUBLIC = s ? o.join(process.env.APP_ROOT, "public") : r;
 let e = null;
 function l() {
   e = new t({
     icon: o.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
     webPreferences: {
-      preload: o.join(r, "preload.mjs")
-    }
+      preload: o.join(i, "preload.mjs")
+    },
+    frame: !1,
+    titleBarStyle: "hiddenInset"
   }), e.webContents.on("did-finish-load", () => {
     e == null || e.webContents.send("main-process-message", (/* @__PURE__ */ new Date()).toLocaleString());
-  }), i ? e.loadURL(i) : e.loadFile(o.join(s, "index.html"));
+  }), s ? e.loadURL(s) : e.loadFile(o.join(r, "index.html"));
 }
 n.on("window-all-closed", () => {
   process.platform !== "darwin" && (n.quit(), e = null);
@@ -26,7 +26,7 @@ n.on("activate", () => {
 });
 n.whenReady().then(l);
 export {
-  _ as MAIN_DIST,
-  s as RENDERER_DIST,
-  i as VITE_DEV_SERVER_URL
+  m as MAIN_DIST,
+  r as RENDERER_DIST,
+  s as VITE_DEV_SERVER_URL
 };

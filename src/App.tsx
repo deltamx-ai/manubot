@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import ReactMarkdown from 'react-markdown'
 import { ChatSession, Message } from './types'
 import './App.css'
 
@@ -9,6 +10,12 @@ function App(): JSX.Element {
   const [inputValue, setInputValue] = useState<string>('')
 
   const currentSession = sessions.find((s) => s.id === currentSessionId)
+
+  const copyToClipboard = (text: string): void => {
+    navigator.clipboard.writeText(text).catch(() => {
+      console.error('Failed to copy to clipboard')
+    })
+  }
 
   const handleSendMessage = (): void => {
     if (inputValue.trim() === '' || !currentSession) return
@@ -136,16 +143,79 @@ function App(): JSX.Element {
                 className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-lg px-4 py-2 rounded-lg ${
+                  className={`max-w-2xl px-4 py-2 rounded-lg group relative ${
                     message.sender === 'user'
                       ? 'bg-blue-500 text-white'
                       : 'bg-gray-200 text-gray-800'
                   }`}
                 >
-                  <p>{message.content}</p>
-                  <p className="text-xs mt-1 opacity-70">
-                    {message.timestamp.toLocaleTimeString()}
-                  </p>
+                  <div className="markdown-content">
+                    <ReactMarkdown
+                      components={{
+                        code: ({ node, inline, className, children, ...props }: any) => {
+                          const match = /language-(\w+)/.exec(className || '')
+                          const lang = match ? match[1] : ''
+                          const codeString = String(children).replace(/\n$/, '')
+
+                          if (!inline) {
+                            return (
+                              <div className="relative bg-gray-900 text-gray-100 rounded my-2 overflow-x-auto">
+                                <button
+                                  onClick={() => copyToClipboard(codeString)}
+                                  className="absolute top-2 right-2 px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 rounded text-white"
+                                >
+                                  Copy
+                                </button>
+                                <pre className="p-3 pt-8">
+                                  <code className={`language-${lang}`}>{codeString}</code>
+                                </pre>
+                              </div>
+                            )
+                          }
+
+                          return (
+                            <code
+                              className="bg-gray-300 px-1 rounded text-gray-900 font-mono"
+                              {...props}
+                            >
+                              {children}
+                            </code>
+                          )
+                        },
+                        pre: ({ children }: any) => <div className="my-2">{children}</div>,
+                        blockquote: ({ children }: any) => (
+                          <blockquote className="border-l-4 border-gray-400 pl-3 italic opacity-70 my-2">
+                            {children}
+                          </blockquote>
+                        ),
+                        a: ({ node, href, children, ...props }: any) => (
+                          <a
+                            href={href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline hover:opacity-70"
+                            {...props}
+                          >
+                            {children}
+                          </a>
+                        ),
+                      }}
+                    >
+                      {message.content}
+                    </ReactMarkdown>
+                  </div>
+                  <div className="flex items-center justify-between mt-2 gap-2">
+                    <p className="text-xs opacity-70">
+                      {message.timestamp.toLocaleTimeString()}
+                    </p>
+                    <button
+                      onClick={() => copyToClipboard(message.content)}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-gray-400 hover:bg-opacity-30 rounded"
+                      title="Copy message"
+                    >
+                      📋
+                    </button>
+                  </div>
                 </div>
               </div>
             ))
