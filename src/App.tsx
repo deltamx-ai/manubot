@@ -72,6 +72,13 @@ function App(): JSX.Element {
     setCurrentSessionId(newSessionId)
   }
 
+  const handleDeleteSession = (sessionId: string): void => {
+    setSessions(sessions.filter((s) => s.id !== sessionId))
+    if (currentSessionId === sessionId) {
+      setCurrentSessionId(null)
+    }
+  }
+
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar - Chat History */}
@@ -86,20 +93,34 @@ function App(): JSX.Element {
         </div>
         <div className="flex-1 overflow-y-auto">
           {sessions.map((session) => (
-            <button
+            <div
               key={session.id}
-              onClick={() => setCurrentSessionId(session.id)}
-              className={`w-full text-left px-4 py-3 border-b border-gray-700 hover:bg-gray-700 transition-colors ${
+              className={`flex items-center px-4 py-3 border-b border-gray-700 hover:bg-gray-700 transition-colors group ${
                 currentSessionId === session.id ? 'bg-gray-700' : ''
               }`}
             >
-              <p className="font-semibold truncate">{session.title}</p>
-              <p className="text-xs text-gray-400 truncate">
-                {session.messages.length > 0
-                  ? session.messages[session.messages.length - 1].content
-                  : 'No messages'}
-              </p>
-            </button>
+              <button
+                onClick={() => setCurrentSessionId(session.id)}
+                className="flex-1 text-left min-w-0"
+              >
+                <p className="font-semibold truncate text-white">{session.title}</p>
+                <p className="text-xs text-gray-400 truncate">
+                  {session.messages.length > 0
+                    ? session.messages[session.messages.length - 1].content
+                    : 'No messages'}
+                </p>
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleDeleteSession(session.id)
+                }}
+                className="ml-2 p-1 text-gray-400 hover:text-red-400 hover:bg-gray-600 rounded opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+                title="Delete chat"
+              >
+                ✕
+              </button>
+            </div>
           ))}
         </div>
       </div>
