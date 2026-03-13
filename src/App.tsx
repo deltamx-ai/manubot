@@ -152,23 +152,24 @@ function App(): JSX.Element {
                   <div className="markdown-content">
                     <ReactMarkdown
                       components={{
-                        code: ({ node, inline, className, children, ...props }: any) => {
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        code: ({ inline, className, children, ...props }: any) => {
                           const match = /language-(\w+)/.exec(className || '')
                           const lang = match ? match[1] : ''
                           const codeString = String(children).replace(/\n$/, '')
 
                           if (!inline) {
                             return (
-                              <div className="relative bg-gray-900 text-gray-100 rounded my-2 overflow-x-auto">
+                              <div className="relative bg-gray-900 text-gray-100 rounded my-2 overflow-x-auto pb-10">
+                                <pre className="p-3">
+                                  <code className={`language-${lang}`}>{codeString}</code>
+                                </pre>
                                 <button
                                   onClick={() => copyToClipboard(codeString)}
-                                  className="absolute top-2 right-2 px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 rounded text-white"
+                                  className="absolute bottom-2 right-2 px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 rounded text-white"
                                 >
                                   Copy
                                 </button>
-                                <pre className="p-3 pt-8">
-                                  <code className={`language-${lang}`}>{codeString}</code>
-                                </pre>
                               </div>
                             )
                           }
@@ -182,13 +183,16 @@ function App(): JSX.Element {
                             </code>
                           )
                         },
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         pre: ({ children }: any) => <div className="my-2">{children}</div>,
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         blockquote: ({ children }: any) => (
                           <blockquote className="border-l-4 border-gray-400 pl-3 italic opacity-70 my-2">
                             {children}
                           </blockquote>
                         ),
-                        a: ({ node, href, children, ...props }: any) => (
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        a: ({ href, children, ...props }: any) => (
                           <a
                             href={href}
                             target="_blank"
