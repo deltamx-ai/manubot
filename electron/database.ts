@@ -29,24 +29,7 @@ export function initDatabase(): void {
 
     CREATE INDEX IF NOT EXISTS idx_messages_session_id ON messages(session_id);
 
-    CREATE TABLE IF NOT EXISTS metadata (
-      key TEXT PRIMARY KEY,
-      value TEXT NOT NULL
-    );
   `)
-
-  // Initialize session counter if not exists
-  db.prepare('INSERT OR IGNORE INTO metadata (key, value) VALUES (?, ?)').run('session_counter', '0')
-}
-
-function getNextSessionNumber(): number {
-  const update = db.prepare('UPDATE metadata SET value = CAST(CAST(value AS INTEGER) + 1 AS TEXT) WHERE key = ?')
-  const select = db.prepare('SELECT value FROM metadata WHERE key = ?')
-  const run = db.transaction(() => {
-    update.run('session_counter')
-    return Number((select.get('session_counter') as { value: string }).value)
-  })
-  return run()
 }
 
 export function getSessions() {
@@ -73,8 +56,7 @@ export function getSessions() {
 }
 
 export function createSession(id: string): string {
-  const num = getNextSessionNumber()
-  const title = `Chat ${num}`
+  const title = 'New Chat'
   const now = new Date().toISOString()
   db.prepare('INSERT INTO sessions (id, title, created_at, updated_at) VALUES (?, ?, ?, ?)').run(id, title, now, now)
   return title
