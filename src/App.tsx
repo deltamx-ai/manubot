@@ -5,6 +5,7 @@ import Sidebar from './components/Sidebar'
 import TitleBar from './components/TitleBar'
 import ChatArea from './components/ChatArea'
 import InputArea from './components/InputArea'
+import SettingsModal from './components/SettingsModal'
 import './App.css'
 
 function App(): JSX.Element {
@@ -12,7 +13,10 @@ function App(): JSX.Element {
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null)
   const [inputValue, setInputValue] = useState<string>('')
   const [sidebarWidth, setSidebarWidth] = useState(260)
+  const [isStreaming, setIsStreaming] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
   const isResizing = useRef(false)
+  const streamingSessionId = useRef<string | null>(null)
 
   useEffect(() => {
     window.storage.loadSessions().then((data) => {
@@ -33,6 +37,73 @@ function App(): JSX.Element {
         setCurrentSessionId(loaded[0].id)
       }
     })
+  }, [])
+
+  // LLM stream listeners
+  useEffect(() => {
+    const offChunk = window.llm.onChunk(({ sessionId, text }) => {
+      setSessions((prev) =>
+        prev.map((s) => {
+          if (s.id !== sessionId) return s
+          const msgs = [...s.messages]
+          const last = msgs[msgs.length - 1]
+          if (last && last.sender === 'bot') {
+            msgs[msgs.length - 1] = { ...last, content: last.content + text }
+          }
+          return { ...s, messages: msgs }
+        })
+      )
+    })
+
+    const offDone = window.llm.onDone(({ sessionId, fullText }) => {
+      setIsStreaming(false)
+      streamingSessionId.current = null
+
+      // Persist bot message
+      setSessions((prev) => {
+        const session = prev.find((s) => s.id === sessionId)
+        const lastMsg = session?.messages[session.messages.length - 1]
+        if (lastMsg && lastMsg.sender === 'bot') {
+          window.storage.createMessage(sessionId, {
+            id: lastMsg.id,
+            content: fullText,
+            sender: 'bot',
+            timestamp: lastMsg.timestamp.toISOString(),
+          })
+        }
+        return prev
+      })
+    })
+
+    const offError = window.llm.onError(({ sessionId, error }) => {
+      setIsStreaming(false)
+      streamingSessionId.current = null
+
+      setSessions((prev) =>
+        prev.map((s) => {
+          if (s.id !== sessionId) return s
+          const msgs = [...s.messages]
+          const last = msgs[msgs.length - 1]
+          if (last && last.sender === 'bot' && last.content === '') {
+            msgs[msgs.length - 1] = { ...last, content: `Error: ${error}` }
+          } else {
+            msgs.push({
+              id: generateId(),
+              content: `Error: ${error}`,
+              sender: 'bot',
+              timestamp: new Date(),
+            })
+          }
+          return { ...s, messages: msgs }
+        })
+      )
+    })
+
+    return () => {
+      offChunk()
+      offDone()
+      offError()
+    }
   }, [])
 
   useEffect(() => {
@@ -57,31 +128,58 @@ function App(): JSX.Element {
   const currentSession = sessions.find((s) => s.id === currentSessionId)
 
   const handleSendMessage = (): void => {
-    if (inputValue.trim() === '' || !currentSessionId) return
+    if (inputValue.trim() === '' || !currentSessionId || isStreaming) return
 
-    const newMessage: Message = {
+    const userMessage: Message = {
       id: generateId(),
       content: inputValue,
       sender: 'user',
       timestamp: new Date(),
     }
 
+    const botMessage: Message = {
+      id: generateId(),
+      content: '',
+      sender: 'bot',
+      timestamp: new Date(),
+    }
+
     setSessions((prev) =>
       prev.map((session) =>
         session.id === currentSessionId
-          ? { ...session, messages: [...session.messages, newMessage], updatedAt: new Date() }
+          ? { ...session, messages: [...session.messages, userMessage, botMessage], updatedAt: new Date() }
           : session
       )
     )
 
     setInputValue('')
+    setIsStreaming(true)
+    streamingSessionId.current = currentSessionId
 
     window.storage.createMessage(currentSessionId, {
-      id: newMessage.id,
-      content: newMessage.content,
-      sender: newMessage.sender,
-      timestamp: newMessage.timestamp.toISOString(),
+      id: userMessage.id,
+      content: userMessage.content,
+      sender: userMessage.sender,
+      timestamp: userMessage.timestamp.toISOString(),
     })
+
+    // Build message history for LLM
+    const currentMessages = sessions.find((s) => s.id === currentSessionId)?.messages ?? []
+    const llmMessages = [
+      ...currentMessages.map((m) => ({
+        role: m.sender === 'user' ? 'user' as const : 'assistant' as const,
+        content: m.content,
+      })),
+      { role: 'user' as const, content: inputValue },
+    ]
+
+    window.llm.chat(currentSessionId, llmMessages)
+  }
+
+  const handleStopStreaming = (): void => {
+    window.llm.abort()
+    setIsStreaming(false)
+    streamingSessionId.current = null
   }
 
   const handleNewChat = async (): Promise<void> => {
@@ -115,6 +213,7 @@ function App(): JSX.Element {
           onSelectSession={setCurrentSessionId}
           onNewChat={handleNewChat}
           onDeleteSession={handleDeleteSession}
+          onOpenSettings={() => setSettingsOpen(true)}
         />
       </div>
 
@@ -139,9 +238,13 @@ function App(): JSX.Element {
           value={inputValue}
           onChange={setInputValue}
           onSend={handleSendMessage}
+          onStop={handleStopStreaming}
+          isStreaming={isStreaming}
           currentSessionId={currentSessionId}
         />
       </div>
+
+      {settingsOpen && <SettingsModal onClose={() => setSettingsOpen(false)} />}
     </div>
   )
 }

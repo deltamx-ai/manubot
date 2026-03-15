@@ -29,6 +29,10 @@ export function initDatabase(): void {
 
     CREATE INDEX IF NOT EXISTS idx_messages_session_id ON messages(session_id);
 
+    CREATE TABLE IF NOT EXISTS settings (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL
+    );
   `)
 }
 
@@ -71,4 +75,13 @@ export function createMessage(sessionId: string, message: { id: string; content:
     message.id, sessionId, message.content, message.sender, message.timestamp
   )
   db.prepare('UPDATE sessions SET updated_at = ? WHERE id = ?').run(message.timestamp, sessionId)
+}
+
+export function setSetting(key: string, value: string): void {
+  db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run(key, value)
+}
+
+export function getSetting(key: string): string | null {
+  const row = db.prepare('SELECT value FROM settings WHERE key = ?').get(key) as { value: string } | undefined
+  return row?.value ?? null
 }
