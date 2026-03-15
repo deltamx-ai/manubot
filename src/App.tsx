@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { ChatSession, Message } from './types'
 import Sidebar from './components/Sidebar'
 import TitleBar from './components/TitleBar'
@@ -10,6 +10,27 @@ function App(): JSX.Element {
   const [sessions, setSessions] = useState<ChatSession[]>([])
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null)
   const [inputValue, setInputValue] = useState<string>('')
+  const [sidebarWidth, setSidebarWidth] = useState(260)
+  const isResizing = useRef(false)
+
+  useEffect(() => {
+    const onMouseMove = (e: MouseEvent) => {
+      if (!isResizing.current) return
+      setSidebarWidth(Math.min(480, Math.max(200, e.clientX)))
+    }
+    const onMouseUp = () => {
+      if (!isResizing.current) return
+      isResizing.current = false
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+    }
+    document.addEventListener('mousemove', onMouseMove)
+    document.addEventListener('mouseup', onMouseUp)
+    return () => {
+      document.removeEventListener('mousemove', onMouseMove)
+      document.removeEventListener('mouseup', onMouseUp)
+    }
+  }, [])
 
   const currentSession = sessions.find((s) => s.id === currentSessionId)
 
@@ -74,7 +95,7 @@ function App(): JSX.Element {
 
   return (
     <div className="flex h-screen">
-      <div className="flex flex-col bg-white border-r border-gray-200" style={{ width: 260, minWidth: 200, maxWidth: 480 }}>
+      <div className="flex flex-col bg-white" style={{ width: sidebarWidth, minWidth: 200, maxWidth: 480 }}>
         <Sidebar
           sessions={sessions}
           currentSessionId={currentSessionId}
@@ -83,6 +104,15 @@ function App(): JSX.Element {
           onDeleteSession={handleDeleteSession}
         />
       </div>
+
+      <div
+        className="w-1 cursor-col-resize bg-gray-200 hover:bg-blue-400 active:bg-blue-500 transition-colors flex-shrink-0"
+        onMouseDown={() => {
+          isResizing.current = true
+          document.body.style.cursor = 'col-resize'
+          document.body.style.userSelect = 'none'
+        }}
+      />
 
       <div className="flex-1 flex flex-col bg-gray-50">
         <TitleBar />
