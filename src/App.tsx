@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { ChatSession, Message } from './types'
+import { generateId } from './utils/snowflake'
 import Sidebar from './components/Sidebar'
 import TitleBar from './components/TitleBar'
 import ChatArea from './components/ChatArea'
@@ -59,7 +60,7 @@ function App(): JSX.Element {
     if (inputValue.trim() === '' || !currentSessionId) return
 
     const newMessage: Message = {
-      id: `${Date.now()}`,
+      id: generateId(),
       content: inputValue,
       sender: 'user',
       timestamp: new Date(),
@@ -83,9 +84,9 @@ function App(): JSX.Element {
     })
   }
 
-  const handleNewChat = (): void => {
-    const newSessionId = `${Date.now()}`
-    const title = `Chat ${sessions.length + 1}`
+  const handleNewChat = async (): Promise<void> => {
+    const newSessionId = generateId()
+    const title = await window.storage.createSession(newSessionId)
     const newSession: ChatSession = {
       id: newSessionId,
       title,
@@ -93,9 +94,8 @@ function App(): JSX.Element {
       createdAt: new Date(),
       updatedAt: new Date(),
     }
-    setSessions((prev) => [...prev, newSession])
+    setSessions((prev) => [newSession, ...prev])
     setCurrentSessionId(newSessionId)
-    window.storage.createSession(newSessionId, title)
   }
 
   const handleDeleteSession = (sessionId: string): void => {

@@ -86,7 +86,7 @@ app.whenReady().then(() => {
   initDatabase()
 
   ipcMain.handle('db:sessions:list', () => getSessions())
-  ipcMain.handle('db:sessions:create', (_e, { id, title }) => createSession(id, title))
+  ipcMain.handle('db:sessions:create', (_e, { id }) => createSession(id))
   ipcMain.handle('db:sessions:delete', (_e, { id }) => deleteSession(id))
   ipcMain.handle('db:messages:create', (_e, { sessionId, message }) => createMessage(sessionId, message))
 

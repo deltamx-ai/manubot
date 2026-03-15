@@ -31,7 +31,7 @@ contextBridge.exposeInMainWorld('windowControls', {
 
 contextBridge.exposeInMainWorld('storage', {
   loadSessions: () => ipcRenderer.invoke('db:sessions:list'),
-  createSession: (id: string, title: string) => ipcRenderer.invoke('db:sessions:create', { id, title }),
+  createSession: (id: string) => ipcRenderer.invoke('db:sessions:create', { id }),
   deleteSession: (id: string) => ipcRenderer.invoke('db:sessions:delete', { id }),
   createMessage: (sessionId: string, message: { id: string; content: string; sender: string; timestamp: string }) =>
     ipcRenderer.invoke('db:messages:create', { sessionId, message }),

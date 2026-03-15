@@ -31,7 +31,7 @@ declare global {
         updatedAt: string
         messages: { id: string; content: string; sender: string; timestamp: string }[]
       }[]>
-      createSession: (id: string, title: string) => Promise<void>
+      createSession: (id: string) => Promise<string>
       deleteSession: (id: string) => Promise<void>
       createMessage: (sessionId: string, message: { id: string; content: string; sender: string; timestamp: string }) => Promise<void>
     }
