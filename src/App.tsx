@@ -106,13 +106,18 @@ function App(): JSX.Element {
       </div>
 
       <div
-        className="w-1 cursor-col-resize bg-gray-200 hover:bg-blue-400 active:bg-blue-500 transition-colors flex-shrink-0"
-        onMouseDown={() => {
-          isResizing.current = true
-          document.body.style.cursor = 'col-resize'
-          document.body.style.userSelect = 'none'
-        }}
-      />
+        className="relative w-0 flex-shrink-0 group"
+      >
+        <div
+          className="absolute top-0 -left-2 w-4 h-full cursor-col-resize z-10"
+          onMouseDown={() => {
+            isResizing.current = true
+            document.body.style.cursor = 'col-resize'
+            document.body.style.userSelect = 'none'
+          }}
+        />
+        <div className="absolute top-0 left-0 w-px h-full bg-gray-200 group-hover:bg-blue-400 transition-colors pointer-events-none" />
+      </div>
 
       <div className="flex-1 flex flex-col bg-gray-50">
         <TitleBar />
