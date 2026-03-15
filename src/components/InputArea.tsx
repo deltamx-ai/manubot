@@ -20,8 +20,8 @@ function InputArea({
   }, [currentSessionId])
 
   return (
-    <div className="h-20 border-t border-gray-300 bg-white p-4 flex-shrink-0">
-      <div className="flex gap-2 h-full">
+    <div className="p-4 border-t border-gray-200">
+      <div className="flex gap-2">
         <input
           ref={inputRef}
           type="text"

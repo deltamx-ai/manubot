@@ -29,7 +29,7 @@ function MessageBubble({ message }: MessageBubbleProps): JSX.Element {
             }
 
             return (
-              <code className="bg-gray-300 px-1 rounded text-gray-900 font-mono">
+              <code className="bg-gray-200 px-1 rounded font-mono">
                 {children}
               </code>
             )
@@ -38,7 +38,7 @@ function MessageBubble({ message }: MessageBubbleProps): JSX.Element {
           pre: ({ children }: any) => <div className="my-2">{children}</div>,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           blockquote: ({ children }: any) => (
-            <blockquote className="border-l-4 border-gray-400 pl-3 italic opacity-70 my-2">
+            <blockquote className="border-l-4 border-gray-300 pl-3 italic opacity-70 my-2">
               {children}
             </blockquote>
           ),
@@ -64,23 +64,23 @@ function MessageBubble({ message }: MessageBubbleProps): JSX.Element {
 
   return (
     <div
-      className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+      className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'} mb-4`}
     >
       <div
-        className={`max-w-2xl px-4 py-2 rounded-lg group relative ${
+        className={`max-w-[80%] px-4 py-2 rounded-lg group relative ${
           message.sender === 'user'
-            ? 'bg-blue-500 text-white'
-            : 'bg-gray-200 text-gray-800'
+            ? 'bg-blue-100'
+            : 'bg-gray-100'
         }`}
       >
         <div className="markdown-content">{renderedContent}</div>
         <div className="flex items-center justify-between mt-2 gap-2">
-          <p className="text-xs opacity-70">
+          <p className="text-xs text-gray-500">
             {message.timestamp.toLocaleTimeString()}
           </p>
           <button
             onClick={() => copyToClipboard(message.content)}
-            className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-gray-400 hover:bg-opacity-30 rounded"
+            className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-gray-200 rounded"
             title="Copy message"
           >
             📋

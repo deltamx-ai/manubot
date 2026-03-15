@@ -14,7 +14,7 @@ function ChatArea({ messages }: ChatAreaProps): JSX.Element {
   }, [messages])
 
   return (
-    <div className="flex-1 overflow-y-auto p-6 space-y-4">
+    <div className="flex-1 overflow-auto p-4">
       {messages.length > 0 ? (
         <>
           {messages.map((message) => (

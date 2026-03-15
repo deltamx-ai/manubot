@@ -73,15 +73,18 @@ function App(): JSX.Element {
   }
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      <Sidebar
-        sessions={sessions}
-        currentSessionId={currentSessionId}
-        onSelectSession={setCurrentSessionId}
-        onNewChat={handleNewChat}
-        onDeleteSession={handleDeleteSession}
-      />
-      <div className="flex-1 flex flex-col bg-white">
+    <div className="flex h-screen">
+      <div className="flex flex-col bg-white border-r border-gray-200" style={{ width: 260, minWidth: 200, maxWidth: 480 }}>
+        <Sidebar
+          sessions={sessions}
+          currentSessionId={currentSessionId}
+          onSelectSession={setCurrentSessionId}
+          onNewChat={handleNewChat}
+          onDeleteSession={handleDeleteSession}
+        />
+      </div>
+
+      <div className="flex-1 flex flex-col bg-gray-50">
         <TitleBar />
         <ChatArea messages={currentSession?.messages ?? []} />
         <InputArea

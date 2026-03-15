@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 .markdown-content {
   word-wrap: break-word;
@@ -13,44 +11,56 @@
 .markdown-content h4,
 .markdown-content h5,
 .markdown-content h6 {
-  @apply font-bold my-2;
+  font-weight: 700;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .markdown-content h1 {
-  @apply text-2xl;
+  font-size: 1.5rem;
+  line-height: 2rem;
 }
 
 .markdown-content h2 {
-  @apply text-xl;
+  font-size: 1.25rem;
+  line-height: 1.75rem;
 }
 
 .markdown-content h3 {
-  @apply text-lg;
+  font-size: 1.125rem;
+  line-height: 1.75rem;
 }
 
 .markdown-content ul,
 .markdown-content ol {
-  @apply my-2 ml-4;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  margin-left: 1rem;
 }
 
 .markdown-content li {
-  @apply my-1;
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
 }
 
 .markdown-content code {
-  @apply font-mono;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
 .markdown-content pre {
-  @apply my-2;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .markdown-content table {
-  @apply border-collapse border border-gray-400 my-2;
+  border-collapse: collapse;
+  border: 1px solid #9ca3af;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .markdown-content th,
 .markdown-content td {
-  @apply border border-gray-400 px-2 py-1;
+  border: 1px solid #9ca3af;
+  padding: 0.25rem 0.5rem;
 }
-
