@@ -28,3 +28,11 @@ contextBridge.exposeInMainWorld('windowControls', {
   maximize: () => ipcRenderer.send('window-maximize'),
   close: () => ipcRenderer.send('window-close'),
 })
+
+contextBridge.exposeInMainWorld('storage', {
+  loadSessions: () => ipcRenderer.invoke('db:sessions:list'),
+  createSession: (id: string, title: string) => ipcRenderer.invoke('db:sessions:create', { id, title }),
+  deleteSession: (id: string) => ipcRenderer.invoke('db:sessions:delete', { id }),
+  createMessage: (sessionId: string, message: { id: string; content: string; sender: string; timestamp: string }) =>
+    ipcRenderer.invoke('db:messages:create', { sessionId, message }),
+})

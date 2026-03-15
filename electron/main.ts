@@ -1,6 +1,7 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
+import { initDatabase, getSessions, createSession, deleteSession, createMessage } from './database'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -81,4 +82,13 @@ ipcMain.on('window-close', () => {
   win?.close()
 })
 
-app.whenReady().then(createWindow)
+app.whenReady().then(() => {
+  initDatabase()
+
+  ipcMain.handle('db:sessions:list', () => getSessions())
+  ipcMain.handle('db:sessions:create', (_e, { id, title }) => createSession(id, title))
+  ipcMain.handle('db:sessions:delete', (_e, { id }) => deleteSession(id))
+  ipcMain.handle('db:messages:create', (_e, { sessionId, message }) => createMessage(sessionId, message))
+
+  createWindow()
+})

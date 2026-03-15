@@ -14,6 +14,27 @@ function App(): JSX.Element {
   const isResizing = useRef(false)
 
   useEffect(() => {
+    window.storage.loadSessions().then((data) => {
+      const loaded: ChatSession[] = data.map((s) => ({
+        id: s.id,
+        title: s.title,
+        createdAt: new Date(s.createdAt),
+        updatedAt: new Date(s.updatedAt),
+        messages: s.messages.map((m) => ({
+          id: m.id,
+          content: m.content,
+          sender: m.sender as 'user' | 'bot',
+          timestamp: new Date(m.timestamp),
+        })),
+      }))
+      setSessions(loaded)
+      if (loaded.length > 0) {
+        setCurrentSessionId(loaded[0].id)
+      }
+    })
+  }, [])
+
+  useEffect(() => {
     const onMouseMove = (e: MouseEvent) => {
       if (!isResizing.current) return
       setSidebarWidth(Math.min(480, Math.max(200, e.clientX)))
@@ -54,36 +75,27 @@ function App(): JSX.Element {
 
     setInputValue('')
 
-    // Simulate bot response
-    setTimeout(() => {
-      const botMessage: Message = {
-        id: `${Date.now()}`,
-        content: 'This is a bot response.',
-        sender: 'bot',
-        timestamp: new Date(),
-      }
-
-      setSessions((prev) =>
-        prev.map((session) =>
-          session.id === currentSessionId
-            ? { ...session, messages: [...session.messages, botMessage], updatedAt: new Date() }
-            : session
-        )
-      )
-    }, 500)
+    window.storage.createMessage(currentSessionId, {
+      id: newMessage.id,
+      content: newMessage.content,
+      sender: newMessage.sender,
+      timestamp: newMessage.timestamp.toISOString(),
+    })
   }
 
   const handleNewChat = (): void => {
     const newSessionId = `${Date.now()}`
+    const title = `Chat ${sessions.length + 1}`
     const newSession: ChatSession = {
       id: newSessionId,
-      title: `Chat ${sessions.length + 1}`,
+      title,
       messages: [],
       createdAt: new Date(),
       updatedAt: new Date(),
     }
     setSessions((prev) => [...prev, newSession])
     setCurrentSessionId(newSessionId)
+    window.storage.createSession(newSessionId, title)
   }
 
   const handleDeleteSession = (sessionId: string): void => {
@@ -91,6 +103,7 @@ function App(): JSX.Element {
     if (currentSessionId === sessionId) {
       setCurrentSessionId(null)
     }
+    window.storage.deleteSession(sessionId)
   }
 
   return (

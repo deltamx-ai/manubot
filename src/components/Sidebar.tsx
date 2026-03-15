@@ -16,7 +16,7 @@ function Sidebar({
   onDeleteSession,
 }: SidebarProps): JSX.Element {
   return (
-    <div className="flex flex-col h-full p-4 overflow-y-auto">
+    <div className="flex flex-col h-full p-4 pr-6 overflow-y-auto">
       <button
         onClick={onNewChat}
         className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded mb-4 transition-colors"
