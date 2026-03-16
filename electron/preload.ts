@@ -64,4 +64,12 @@ contextBridge.exposeInMainWorld('settings', {
   setActive: (provider: string, model: string) => ipcRenderer.invoke('settings:set-active', { provider, model }),
   setApiKey: (providerId: string, apiKey: string) => ipcRenderer.invoke('settings:set-api-key', { providerId, apiKey }),
   hasApiKey: (providerId: string) => ipcRenderer.invoke('settings:has-api-key', { providerId }),
+  getSystemPrompt: () => ipcRenderer.invoke('settings:get-system-prompt'),
+  setSystemPrompt: (prompt: string) => ipcRenderer.invoke('settings:set-system-prompt', { prompt }),
+})
+
+contextBridge.exposeInMainWorld('copilot', {
+  startAuth: () => ipcRenderer.invoke('copilot:start-auth'),
+  pollAuth: (deviceCode: string) => ipcRenderer.invoke('copilot:poll-auth', { deviceCode }),
+  fetchModels: () => ipcRenderer.invoke('copilot:fetch-models'),
 })

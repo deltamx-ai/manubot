@@ -20,6 +20,7 @@ export interface ProviderInfo {
   id: string
   displayName: string
   models: string[]
+  authType: 'apikey' | 'oauth'
 }
 
 // window 全局类型声明
@@ -55,6 +56,13 @@ declare global {
       setActive: (provider: string, model: string) => Promise<void>
       setApiKey: (providerId: string, apiKey: string) => Promise<void>
       hasApiKey: (providerId: string) => Promise<boolean>
+      getSystemPrompt: () => Promise<string>
+      setSystemPrompt: (prompt: string) => Promise<void>
+    }
+    copilot: {
+      startAuth: () => Promise<{ deviceCode: string; userCode: string; interval: number; expiresIn: number }>
+      pollAuth: (deviceCode: string) => Promise<{ status: 'pending' | 'expired' | 'token'; token?: string }>
+      fetchModels: () => Promise<string[]>
     }
   }
 }

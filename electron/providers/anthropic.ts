@@ -15,7 +15,7 @@ export const anthropicProvider: LLMProvider = {
     })
   },
 
-  stream(messages: ChatMessage[], model: string, apiKey: string, callbacks: StreamCallbacks): () => void {
+  stream(messages: ChatMessage[], model: string, apiKey: string, callbacks: StreamCallbacks, systemPrompt?: string): () => void {
     const client = new Anthropic({ apiKey })
     const controller = new AbortController()
     let fullText = ''
@@ -27,6 +27,7 @@ export const anthropicProvider: LLMProvider = {
             model,
             max_tokens: 8192,
             messages: messages.map((m) => ({ role: m.role, content: m.content })),
+            ...(systemPrompt ? { system: systemPrompt } : {}),
           },
           { signal: controller.signal }
         )

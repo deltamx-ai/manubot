@@ -1,9 +1,10 @@
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { initDatabase, getSessions, createSession, deleteSession, createMessage } from './database'
-import { initSettings, getApiKey, setApiKey, hasApiKey, getActiveProvider, setActiveProvider, getActiveModel, setActiveModel } from './settings'
+import { initSettings, getApiKey, setApiKey, hasApiKey, getActiveProvider, setActiveProvider, getActiveModel, setActiveModel, getSystemPrompt, setSystemPrompt } from './settings'
 import { providers } from './providers'
+import { requestDeviceCode, pollForToken } from './copilot-auth'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -112,6 +113,8 @@ app.whenReady().then(() => {
 
     const model = getActiveModel() ?? provider.models[0]
 
+    const systemPrompt = getSystemPrompt()
+
     currentAbort = provider.stream(messages, model, apiKey, {
       onChunk: (text) => {
         win?.webContents.send('llm:chunk', { sessionId, text })
@@ -124,7 +127,7 @@ app.whenReady().then(() => {
         currentAbort = null
         win?.webContents.send('llm:error', { sessionId, error: error.message })
       },
-    })
+    }, systemPrompt)
   })
 
   ipcMain.on('llm:abort', () => {
@@ -138,6 +141,7 @@ app.whenReady().then(() => {
       id: p.id,
       displayName: p.displayName,
       models: p.models,
+      authType: p.authType ?? 'apikey',
     }))
   })
 
@@ -164,6 +168,37 @@ app.whenReady().then(() => {
 
   ipcMain.handle('settings:has-api-key', (_e, { providerId }) => {
     return hasApiKey(providerId)
+  })
+
+  ipcMain.handle('settings:get-system-prompt', () => {
+    return getSystemPrompt()
+  })
+
+  ipcMain.handle('settings:set-system-prompt', (_e, { prompt }) => {
+    setSystemPrompt(prompt)
+  })
+
+  // Copilot OAuth handlers
+  ipcMain.handle('copilot:start-auth', async () => {
+    const data = await requestDeviceCode()
+    shell.openExternal(data.verification_uri)
+    return { deviceCode: data.device_code, userCode: data.user_code, interval: data.interval, expiresIn: data.expires_in }
+  })
+
+  ipcMain.handle('copilot:poll-auth', async (_e, { deviceCode }) => {
+    const result = await pollForToken(deviceCode)
+    if (result.status === 'token' && result.token) {
+      setApiKey('copilot', result.token)
+    }
+    return result
+  })
+
+  ipcMain.handle('copilot:fetch-models', async () => {
+    const githubToken = getApiKey('copilot')
+    if (!githubToken) throw new Error('Not signed in to GitHub Copilot')
+    const provider = providers['copilot']
+    if (!provider.fetchModels) throw new Error('Provider does not support fetchModels')
+    return provider.fetchModels(githubToken)
   })
 
   createWindow()

@@ -49,3 +49,14 @@ export function getActiveModel(): string | null {
 export function setActiveModel(model: string): void {
   setSetting('active:model', model)
 }
+
+const DEFAULT_SYSTEM_PROMPT =
+  'You are Manubot, a helpful AI assistant. You provide clear, accurate, and thoughtful responses. You can help with writing, analysis, coding, math, creative tasks, and general knowledge questions. When you\'re unsure about something, you say so honestly. You format responses with Markdown when appropriate.'
+
+export function getSystemPrompt(): string {
+  return getSetting('system:prompt') ?? DEFAULT_SYSTEM_PROMPT
+}
+
+export function setSystemPrompt(prompt: string): void {
+  setSetting('system:prompt', prompt)
+}

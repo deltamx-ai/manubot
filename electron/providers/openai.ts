@@ -11,17 +11,23 @@ export const openaiProvider: LLMProvider = {
     await client.models.list()
   },
 
-  stream(messages: ChatMessage[], model: string, apiKey: string, callbacks: StreamCallbacks): () => void {
+  stream(messages: ChatMessage[], model: string, apiKey: string, callbacks: StreamCallbacks, systemPrompt?: string): () => void {
     const client = new OpenAI({ apiKey })
     const controller = new AbortController()
     let fullText = ''
 
     ;(async () => {
       try {
+        const apiMessages: { role: 'system' | 'user' | 'assistant'; content: string }[] =
+          messages.map((m) => ({ role: m.role, content: m.content }))
+        if (systemPrompt) {
+          apiMessages.unshift({ role: 'system', content: systemPrompt })
+        }
+
         const stream = await client.chat.completions.create(
           {
             model,
-            messages: messages.map((m) => ({ role: m.role, content: m.content })),
+            messages: apiMessages,
             stream: true,
           },
           { signal: controller.signal }
