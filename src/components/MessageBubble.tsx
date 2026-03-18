@@ -67,7 +67,7 @@ function MessageBubble({ message }: MessageBubbleProps): JSX.Element {
       className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'} mb-4`}
     >
       <div
-        className={`max-w-[80%] px-4 py-2 rounded-lg group relative ${
+        className={`max-w-[80%] overflow-hidden px-4 py-2 rounded-lg group relative ${
           message.sender === 'user'
             ? 'bg-blue-100'
             : 'bg-gray-100'

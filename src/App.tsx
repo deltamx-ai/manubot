@@ -231,7 +231,7 @@ function App(): JSX.Element {
         <div className="absolute top-0 left-0 w-px h-full bg-gray-200 group-hover:bg-blue-400 transition-colors pointer-events-none" />
       </div>
 
-      <div className="flex-1 flex flex-col bg-gray-50">
+      <div className="flex-1 min-w-0 flex flex-col bg-gray-50">
         <TitleBar />
         <ChatArea messages={currentSession?.messages ?? []} />
         <InputArea
